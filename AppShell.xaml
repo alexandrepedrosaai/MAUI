@@ -15,6 +15,12 @@
         Route="main" />
 
     <ShellContent
+        Title="Halo Benchmarks"
+        Icon="{StaticResource IconProjects}"
+        ContentTemplate="{DataTemplate pages:BenchmarkDashboardPage}"
+        Route="benchmarks" />
+
+    <ShellContent
         Title="Projects"
         Icon="{StaticResource IconProjects}"
         ContentTemplate="{DataTemplate pages:ProjectListPage}"

@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:chart="clr-namespace:Syncfusion.Maui.Toolkit.Charts;assembly=Syncfusion.Maui.Toolkit"
+             xmlns:pageModels="clr-namespace:MauiApp1.PageModels"
+             x:Class="MauiApp1.Pages.BenchmarkDashboardPage"
+             x:DataType="pageModels:BenchmarkDashboardPageModel"
+             Title="Halo Benchmark Hub">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="18">
+
+            <Label Text="Halo Benchmark Hub"
+                   FontSize="28"
+                   FontAttributes="Bold"
+                   TextColor="{AppThemeBinding Light=#0F172A, Dark=#F8FAFC}" />
+
+            <Label Text="Windows Zenith public benchmark showcase for model performance, community validation, and hardware readiness."
+                   FontSize="14"
+                   LineBreakMode="WordWrap"
+                   TextColor="{AppThemeBinding Light=#475569, Dark=#CBD5E1}" />
+
+            <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
+                <HorizontalStackLayout Spacing="12">
+                    <Border Padding="14" WidthRequest="180" StrokeThickness="1" Stroke="#1F2937" BackgroundColor="{AppThemeBinding Light=#F8FAFC, Dark=#0F172A}" StrokeShape="RoundRectangle 16">
+                        <VerticalStackLayout>
+                            <Label Text="Total Models" FontSize="12" TextColor="#7DD3FC" />
+                            <Label Text="{Binding TotalTrackedModels}" FontSize="28" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#0F172A, Dark=#F8FAFC}" />
+                            <Label Text="community tracked" FontSize="12" TextColor="#34D399" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border Padding="14" WidthRequest="180" StrokeThickness="1" Stroke="#1F2937" BackgroundColor="{AppThemeBinding Light=#F8FAFC, Dark=#0F172A}" StrokeShape="RoundRectangle 16">
+                        <VerticalStackLayout>
+                            <Label Text="Avg. Score" FontSize="12" TextColor="#A78BFA" />
+                            <Label Text="{Binding AverageModelScore, StringFormat='{0:F1}'}" FontSize="28" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#0F172A, Dark=#F8FAFC}" />
+                            <Label Text="LLM / Vision" FontSize="12" TextColor="#94A3B8" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border Padding="14" WidthRequest="180" StrokeThickness="1" Stroke="#1F2937" BackgroundColor="{AppThemeBinding Light=#F8FAFC, Dark=#0F172A}" StrokeShape="RoundRectangle 16">
+                        <VerticalStackLayout>
+                            <Label Text="Latency" FontSize="12" TextColor="#F9A8D4" />
+                            <Label Text="{Binding AverageSystemLatencyMs, StringFormat='{0:F0}ms'}" FontSize="28" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#0F172A, Dark=#F8FAFC}" />
+                            <Label Text="system response" FontSize="12" TextColor="#34D399" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border Padding="14" WidthRequest="180" StrokeThickness="1" Stroke="#1F2937" BackgroundColor="{AppThemeBinding Light=#F8FAFC, Dark=#0F172A}" StrokeShape="RoundRectangle 16">
+                        <VerticalStackLayout>
+                            <Label Text="Win. Zenith" FontSize="12" TextColor="#7DD3FC" />
+                            <Label Text="Ready" FontSize="28" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#0F172A, Dark=#F8FAFC}" />
+                            <Label Text="AI workload stack" FontSize="12" TextColor="#34D399" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                </HorizontalStackLayout>
+            </ScrollView>
+
+            <Grid ColumnDefinitions="2*,1*" ColumnSpacing="18">
+                <Border Grid.Column="0" Padding="12" StrokeThickness="1" Stroke="#1F2937" BackgroundColor="{AppThemeBinding Light=#F8FAFC, Dark=#0F172A}" StrokeShape="RoundRectangle 16">
+                    <VerticalStackLayout>
+                        <Label Text="Benchmark distribution" FontSize="18" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#0F172A, Dark=#F8FAFC}" />
+                        <chart:SfCircularChart HeightRequest="260">
+                            <chart:DoughnutSeries
+                                ItemsSource="{Binding BenchmarkBreakdown}"
+                                PaletteBrushes="{Binding CategoryPalette}"
+                                XBindingPath="Title"
+                                YBindingPath="Count"
+                                ShowDataLabels="True"
+                                InnerRadius="0.7" />
+                        </chart:SfCircularChart>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Grid.Column="1" Padding="12" StrokeThickness="1" Stroke="#1F2937" BackgroundColor="{AppThemeBinding Light=#F8FAFC, Dark=#0F172A}" StrokeShape="RoundRectangle 16">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Trending" FontSize="18" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#0F172A, Dark=#F8FAFC}" />
+                        <CollectionView ItemsSource="{Binding FeaturedBenchmarks}" SelectionMode="None">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="pageModels:BenchmarkModel">
+                                    <Border Padding="10" Margin="0,0,0,8" StrokeThickness="1" Stroke="#1F2937" BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#111827}" StrokeShape="RoundRectangle 12">
+                                        <Grid ColumnDefinitions="Auto,*,Auto">
+                                            <Border Grid.Column="0"
+                                                    WidthRequest="52"
+                                                    HeightRequest="28"
+                                                    StrokeThickness="0"
+                                                    BackgroundColor="{Binding Accent}"
+                                                    StrokeShape="RoundRectangle 8"
+                                                    Padding="6,2">
+                                                <Label Text="{Binding Tag}" FontSize="10" FontAttributes="Bold" TextColor="White" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+                                            </Border>
+
+                                            <VerticalStackLayout Grid.Column="1" Margin="10,0,0,0">
+                                                <Label Text="{Binding Name}" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#0F172A, Dark=#F8FAFC}" />
+                                                <Label Text="{Binding Category}" FontSize="12" TextColor="#94A3B8" />
+                                            </VerticalStackLayout>
+
+                                            <Label Grid.Column="2"
+                                                   Text="{Binding Score, StringFormat='{0:F1}'}"
+                                                   FontAttributes="Bold"
+                                                   TextColor="#34D399"
+                                                   VerticalTextAlignment="Center" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </VerticalStackLayout>
+                </Border>
+            </Grid>
+
+            <Border Padding="12" StrokeThickness="1" Stroke="#1F2937" BackgroundColor="{AppThemeBinding Light=#F8FAFC, Dark=#0F172A}" StrokeShape="RoundRectangle 16">
+                <VerticalStackLayout>
+                    <Label Text="Public leaderboard" FontSize="20" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#0F172A, Dark=#F8FAFC}" />
+
+                    <CollectionView ItemsSource="{Binding LeaderboardBenchmarks}" SelectionMode="None">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="pageModels:BenchmarkModel">
+                                <Grid ColumnDefinitions="40,*,120,100" Padding="10" ColumnSpacing="12">
+                                    <Label Grid.Column="0" Text="{Binding Tag}" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#0F172A, Dark=#F8FAFC}" />
+
+                                    <VerticalStackLayout Grid.Column="1">
+                                        <Label Text="{Binding Name}" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#0F172A, Dark=#F8FAFC}" />
+                                        <Label Text="{Binding Vendor}" FontSize="12" TextColor="#94A3B8" />
+                                    </VerticalStackLayout>
+
+                                    <Label Grid.Column="2" Text="{Binding Category}" HorizontalTextAlignment="Center" TextColor="#7DD3FC" />
+
+                                    <Label Grid.Column="3"
+                                           Text="{Binding Score, StringFormat='{0:F1}'}"
+                                           FontAttributes="Bold"
+                                           HorizontalTextAlignment="End"
+                                           TextColor="#7DD3FC" />
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+            </Border>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
+                </HorizontalStackLayout>
+            </ScrollView>
+
+            <Grid ColumnDefinitions="2*,1*" ColumnSpacing="18">
+                <Border Grid.Column="0" Padding="12" StrokeThickness="1" Stroke="#1F2937" BackgroundColor="{AppThemeBinding Light=#F8FAFC, Dark=#0F172A}" StrokeShape="RoundRectangle 16">
+                    <VerticalStackLayout>
+                        <Label Text="Benchmark distribution" FontSize="18" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#0F172A, Dark=#F8FAFC}" />
+                        <chart:SfCircularChart HeightRequest="260">
+                            <chart:SfCircularChart.Resources>
+                                <x:String x:Key="Empty" />
+                            </chart:SfCircularChart.Resources>
+                            <chart:DoughnutSeries
+                                ItemsSource="{Binding BenchmarkCategoryData}"
+                                PaletteBrushes="{Binding BenchmarkCategoryColors}"
+                                XBindingPath="Title"
+                                YBindingPath="Count"
+                                ShowDataLabels="True"
+                                InnerRadius="0.7" />
+                        </chart:SfCircularChart>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Grid.Column="1" Padding="12" StrokeThickness="1" Stroke="#1F2937" BackgroundColor="{AppThemeBinding Light=#F8FAFC, Dark=#0F172A}" StrokeShape="RoundRectangle 16">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Trending" FontSize="18" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#0F172A, Dark=#F8FAFC}" />
+                        <CollectionView ItemsSource="{Binding FeaturedModels}" SelectionMode="None">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="pageModels:BenchmarkModel">
+                                    <Border Padding="10" Margin="0,0,0,8" StrokeThickness="1" Stroke="#1F2937" BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#111827}" StrokeShape="RoundRectangle 12">
+                                        <Grid ColumnDefinitions="Auto,*,Auto">
+                                            <Border Grid.Column="0"
+                                                    WidthRequest="52"
+                                                    HeightRequest="28"
+                                                    StrokeThickness="0"
+                                                    BackgroundColor="{Binding Accent}"
+                                                    StrokeShape="RoundRectangle 8"
+                                                    Padding="6,2">
+                                                <Label Text="{Binding Tag}" FontSize="10" FontAttributes="Bold" TextColor="White" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+                                            </Border>
+
+                                            <VerticalStackLayout Grid.Column="1" Margin="10,0,0,0">
+                                                <Label Text="{Binding Name}" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#0F172A, Dark=#F8FAFC}" />
+                                                <Label Text="{Binding Category}" FontSize="12" TextColor="#94A3B8" />
+                                            </VerticalStackLayout>
+
+                                            <Label Grid.Column="2"
+                                                   Text="{Binding Score, StringFormat='{0:F1}'}"
+                                                   FontAttributes="Bold"
+                                                   TextColor="#34D399"
+                                                   VerticalTextAlignment="Center" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </VerticalStackLayout>
+                </Border>
+            </Grid>
+
+            <Border Padding="12" StrokeThickness="1" Stroke="#1F2937" BackgroundColor="{AppThemeBinding Light=#F8FAFC, Dark=#0F172A}" StrokeShape="RoundRectangle 16">
+                <VerticalStackLayout>
+                    <Label Text="Public leaderboard" FontSize="20" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#0F172A, Dark=#F8FAFC}" />
+
+                    <CollectionView ItemsSource="{Binding Leaderboard}" SelectionMode="None">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="pageModels:BenchmarkModel">
+                                <Grid ColumnDefinitions="40,*,120,100" Padding="10" ColumnSpacing="12">
+                                    <Label Grid.Column="0" Text="{Binding Tag}" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#0F172A, Dark=#F8FAFC}" />
+
+                                    <VerticalStackLayout Grid.Column="1">
+                                        <Label Text="{Binding Name}" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#0F172A, Dark=#F8FAFC}" />
+                                        <Label Text="{Binding Vendor}" FontSize="12" TextColor="#94A3B8" />
+                                    </VerticalStackLayout>
+
+                                    <Label Grid.Column="2" Text="{Binding Category}" HorizontalTextAlignment="Center" TextColor="#7DD3FC" />
+
+                                    <Label Grid.Column="3"
+                                           Text="{Binding Score, StringFormat='{0:F1}'}"
+                                           FontAttributes="Bold"
+                                           HorizontalTextAlignment="End"
+                                           TextColor="#7DD3FC" />
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+            </Border>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
