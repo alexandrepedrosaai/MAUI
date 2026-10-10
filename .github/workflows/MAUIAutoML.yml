@@ -1,0 +1,229 @@
+name: MAUI AutoML
+
+on:
+  workflow_dispatch:
+
+  push:
+    branches:
+      - main
+      - master
+
+  pull_request:
+
+permissions:
+  contents: write
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+jobs:
+
+  validar-e-compilar:
+
+    name: Validar e Compilar MAUI
+
+    runs-on: macos-latest
+
+    steps:
+
+      - name: Baixar código-fonte
+        uses: actions/checkout@v4
+
+      - name: Configurar .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+          cache: true
+
+      - name: Criar estrutura MAUI AutoML
+        shell: bash
+        run: |
+
+          mkdir -p MAUI-AutoML
+          mkdir -p MAUI-AutoML/android
+          mkdir -p MAUI-AutoML/ios
+          mkdir -p MAUI-AutoML/builds
+          mkdir -p MAUI-AutoML/logs
+          mkdir -p MAUI-AutoML/relatorios
+          mkdir -p MAUI-AutoML/validacao
+
+      - name: Localizar projeto
+        id: projeto
+        shell: bash
+        run: |
+
+          ARQUIVO=$(find . -name "*.csproj" | head -n 1 || true)
+
+          if [ -z "$ARQUIVO" ]; then
+
+            echo "encontrado=false" >> "$GITHUB_OUTPUT"
+
+            {
+              echo "# Projeto não encontrado"
+              echo ""
+              echo "Nenhum arquivo .csproj foi localizado."
+            } > MAUI-AutoML/relatorios/projeto.md
+
+          else
+
+            echo "encontrado=true" >> "$GITHUB_OUTPUT"
+            echo "arquivo=$ARQUIVO" >> "$GITHUB_OUTPUT"
+
+            {
+              echo "# Projeto Encontrado"
+              echo ""
+              echo "$ARQUIVO"
+            } > MAUI-AutoML/relatorios/projeto.md
+
+          fi
+
+      - name: Informações do SDK
+        shell: bash
+        run: |
+
+          dotnet --info \
+          > MAUI-AutoML/logs/dotnet-info.txt || true
+
+      - name: Restaurar workloads
+        if: steps.projeto.outputs.encontrado == 'true'
+        run: |
+          dotnet workload restore
+
+      - name: Listar workloads
+        if: steps.projeto.outputs.encontrado == 'true'
+        run: |
+
+          dotnet workload list \
+          > MAUI-AutoML/logs/workloads.txt || true
+
+      - name: Restaurar dependências
+        if: steps.projeto.outputs.encontrado == 'true'
+        run: |
+
+          dotnet restore \
+          "${{ steps.projeto.outputs.arquivo }}"
+
+      - name: Validar projeto MAUI
+        if: steps.projeto.outputs.encontrado == 'true'
+        shell: bash
+        run: |
+
+          if grep -q "UseMaui" "${{ steps.projeto.outputs.arquivo }}"; then
+
+            echo "Projeto MAUI identificado." \
+            > MAUI-AutoML/validacao/maui.txt
+
+          else
+
+            echo "Projeto não parece utilizar MAUI." \
+            > MAUI-AutoML/validacao/maui.txt
+
+          fi
+
+      - name: Build Android
+        if: steps.projeto.outputs.encontrado == 'true'
+        continue-on-error: true
+        run: |
+
+          dotnet publish \
+            "${{ steps.projeto.outputs.arquivo }}" \
+            -f net8.0-android \
+            -c Release \
+            -p:AndroidKeyStore=false
+
+      - name: Build iOS
+        if: steps.projeto.outputs.encontrado == 'true'
+        continue-on-error: true
+        run: |
+
+          dotnet build \
+            "${{ steps.projeto.outputs.arquivo }}" \
+            -f net8.0-ios \
+            -c Release
+
+      - name: Auditoria de Dependências
+        if: steps.projeto.outputs.encontrado == 'true'
+        continue-on-error: true
+        run: |
+
+          dotnet list \
+            "${{ steps.projeto.outputs.arquivo }}" \
+            package \
+            --vulnerable \
+            --include-transitive \
+            > MAUI-AutoML/logs/auditoria.txt
+
+      - name: Coletar APK
+        shell: bash
+        run: |
+
+          find . -name "*.apk" \
+          -exec cp {} MAUI-AutoML/android/ \; || true
+
+      - name: Coletar AAB
+        shell: bash
+        run: |
+
+          find . -name "*.aab" \
+          -exec cp {} MAUI-AutoML/android/ \; || true
+
+      - name: Coletar IPA
+        shell: bash
+        run: |
+
+          find . -name "*.ipa" \
+          -exec cp {} MAUI-AutoML/ios/ \; || true
+
+      - name: Gerar Relatório Geral
+        shell: bash
+        run: |
+
+          {
+            echo "# Relatório da Pipeline"
+            echo ""
+            echo "Workflow: ${{ github.workflow }}"
+            echo ""
+            echo "Execução: ${{ github.run_number }}"
+            echo ""
+            echo "Branch: ${{ github.ref_name }}"
+            echo ""
+            echo "Evento: ${{ github.event_name }}"
+            echo ""
+            echo "Commit: ${{ github.sha }}"
+            echo ""
+            echo "Data:"
+            date
+          } > MAUI-AutoML/relatorios/pipeline.md
+
+      - name: Gerar Inventário
+        shell: bash
+        run: |
+
+          find MAUI-AutoML \
+          > MAUI-AutoML/relatorios/estrutura.txt
+
+      - name: Publicar Artefatos
+        uses: actions/upload-artifact@v4
+        with:
+          name: MAUI-AutoML
+          path: MAUI-AutoML
+          if-no-files-found: warn
+
+      - name: Commit Automático
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+
+          git config user.name "github-actions[bot]"
+
+          git config user.email \
+          "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add MAUI-AutoML
+
+          git commit \
+          -m "Atualização automática MAUI AutoML #${{ github.run_number }}" \
+          || true
+
+          git push || true
